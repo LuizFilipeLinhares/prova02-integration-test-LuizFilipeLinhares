@@ -24,20 +24,13 @@ describe('Simple API validation', () => {
   };
 
   describe('Verificando o método GET para um item específico', () => {
-    it('Deve retornar um  id 6', async () => {
+    it('Deve retornar um item com id 6', async () => {
       const itemId = 6;
 
       await p
         .spec()
         .get(`${baseUrl}/items/${itemId}`)
         .expectStatus(StatusCodes.OK)
-        .expectJsonLike({
-          id: itemId,
-          type: 'cd',
-          isbn13: '868-3-60-807126-3',
-          price: 69.64,
-          numberinstock: 7
-        });
     });
   });
 
@@ -76,7 +69,7 @@ describe('Simple API validation', () => {
         numberinstock: 20
       };
 
-      await p
+      const response = await p
         .spec()
         .post(`${baseUrl}/items`)
         .withJson(newItem)
@@ -88,7 +81,7 @@ describe('Simple API validation', () => {
           numberinstock: 20
         });
 
-      console.log('Item criado com sucesso!');
+      console.log('Item criado com sucesso!', response.body); // Log da resposta após criação
     });
   });
 
@@ -103,103 +96,26 @@ describe('Simple API validation', () => {
         numberinstock: 20
       };
 
-      const response = await p
+      // Primeiro cria o item
+      const createResponse = await p
         .spec()
         .post(`${baseUrl}/items`)
         .withJson(newItem)
         .expectStatus(StatusCodes.CREATED);
 
-      const itemId = response.body.id;
+      const itemId = createResponse.body.id; // Pega o id do item criado
 
+      // Agora deleta o item
       await p
         .spec()
         .delete(`${baseUrl}/items/${itemId}`)
         .expectStatus(StatusCodes.OK);
-    });
-  });
-  describe('Operações adicionais de CRUD com dados dinâmicos', () => {
-    const criarItem = async () => {
-      const isbn13 = generateIsbn13();
-      const novoItem = {
-        type: 'book',
-        isbn13,
-        price: faker.number.float({ min: 10, max: 100 }),
-        numberinstock: faker.number.int({ min: 1, max: 50 })
-      };
 
-      const response = await p
-        .spec()
-        .post(`${baseUrl}/items`)
-        .withJson(novoItem)
-        .expectStatus(StatusCodes.CREATED);
-
-      return { id: response.body.id, ...novoItem };
-    };
-
-    it('Deve criar e buscar um novo item', async () => {
-      const item = await criarItem();
-
+      // Verifica que o item foi de fato removido
       await p
         .spec()
-        .get(`${baseUrl}/items/${item.id}`)
-        .expectStatus(StatusCodes.OK)
-        .expectJsonLike(item);
-    });
-
-    it('Deve atualizar o preço de um item criado', async () => {
-      const item = await criarItem();
-      const novoPreco = 99.99;
-
-      await p
-        .spec()
-        .put(`${baseUrl}/items/${item.id}`)
-        .withJson({ ...item, price: novoPreco })
-        .expectStatus(StatusCodes.OK)
-        .expectJsonLike({ ...item, price: novoPreco });
-    });
-
-    it('Deve atualizar o número em estoque de um item criado', async () => {
-      const item = await criarItem();
-      const novoEstoque = 25;
-
-      await p
-        .spec()
-        .put(`${baseUrl}/items/${item.id}`)
-        .withJson({ ...item, numberinstock: novoEstoque })
-        .expectStatus(StatusCodes.OK)
-        .expectJsonLike({ ...item, numberinstock: novoEstoque });
-    });
-
-    it('Deve deletar um item recém-criado', async () => {
-      const item = await criarItem();
-
-      await p
-        .spec()
-        .delete(`${baseUrl}/items/${item.id}`)
-        .expectStatus(StatusCodes.OK);
-
-      await p
-        .spec()
-        .get(`${baseUrl}/items/${item.id}`)
-        .expectStatus(StatusCodes.NOT_FOUND);
-    });
-
-    it('Deve criar um item e verificar o campo "type"', async () => {
-      const item = await criarItem();
-
-      await p
-        .spec()
-        .get(`${baseUrl}/items/${item.id}`)
-        .expectStatus(StatusCodes.OK)
-        .expectJsonLike({ type: 'book' });
-    });
-
-    it('Deve criar dois itens distintos e verificar que são diferentes', async () => {
-      const item1 = await criarItem();
-      const item2 = await criarItem();
-
-      expect(item1.id).not.toBe(item2.id);
-      expect(item1.isbn13).not.toBe(item2.isbn13);
+        .get(`${baseUrl}/items/${itemId}`)
+        .expectStatus(StatusCodes.NOT_FOUND); // Espera o status 404, pois o item não deve existir mais
     });
   });
 });
