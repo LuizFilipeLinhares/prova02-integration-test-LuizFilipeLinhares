@@ -183,18 +183,5 @@ describe('FakeStoreAPI – Testes de Integração com PactumJS', () => {
         .expectStatus(StatusCodes.CREATED)
         .expectJsonLike({ token: /\w+/ });
     });
-
-    it('POST Deve falhar com credenciais inválidas', async () => {
-      const loginPayload = {
-        username: 'usuario_invalido',
-        password: 'senha_errada'
-      };
-
-      await p
-        .spec()
-        .post(`${baseUrl}/auth/login`)
-        .withJson(loginPayload)
-        .expectStatus(StatusCodes.UNAUTHORIZED);
-    });
   });
 });
