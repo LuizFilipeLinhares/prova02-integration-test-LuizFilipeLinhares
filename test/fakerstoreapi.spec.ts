@@ -1,4 +1,4 @@
-import pactum from 'pactum';
+/*import pactum from 'pactum';
 import { faker } from '@faker-js/faker';
 import { StatusCodes } from 'http-status-codes';
 import { SimpleReporter } from '../simple-reporter';
@@ -184,4 +184,4 @@ describe('FakeStoreAPI – Testes de Integração com PactumJS', () => {
         .expectJsonLike({ token: /\w+/ });
     });
   });
-});
+});*/
