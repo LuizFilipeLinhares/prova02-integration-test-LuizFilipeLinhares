@@ -79,9 +79,7 @@ describe('Simple API validation', () => {
           isbn13: isbn13,
           price: 70.0,
           numberinstock: 20
-        });
-
-      console.log('Item criado com sucesso!', response.body); 
+        }); 
     });
   });
 
