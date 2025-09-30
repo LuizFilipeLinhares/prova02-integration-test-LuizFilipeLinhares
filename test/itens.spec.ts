@@ -179,6 +179,62 @@ describe('Simple API validation', () => {
         .expectStatus(StatusCodes.NOT_FOUND);
     });
   });
+  describe('Validação ao criar item com price negativo', () => {
+    it('Não deve permitir criar item com preço negativo', async () => {
+      const newItem = {
+        type: 'book',
+        isbn13: generateIsbn13(),
+        price: -10.0,
+        numberinstock: 5
+      };
+  
+      await p
+        .spec()
+        .post(`${baseUrl}/items`)
+        .withJson(newItem)
+        .expectStatus(StatusCodes.BAD_REQUEST);
+    });
+  });
+
+  describe('DELETE de item inexistente', () => {
+    it('Deve retornar NOT FOUND', async () => {
+      await p
+        .spec()
+        .delete(`${baseUrl}/items/9999`)
+        .expectStatus(StatusCodes.NOT_FOUND);
+    });
+  });
+
+  describe('PUT com campo não esperado', () => {
+    it('Deve ignorar ou retornar erro ao enviar campo inválido', async () => {
+      const updatedItem = {
+        type: 'cd',
+        isbn13: generateIsbn13(),
+        price: 50.0,
+        numberinstock: 2,
+        unexpectedField: 'unexpected'
+      };
+  
+      await p
+        .spec()
+        .put(`${baseUrl}/items/1`)
+        .withJson(updatedItem)
+        .expectStatus(StatusCodes.BAD_REQUEST); // ou OK dependendo da API
+    });
+  });
+  
+  describe('PUT com payload vazio', () => {
+    it('Deve retornar BAD_REQUEST', async () => {
+      await p
+        .spec()
+        .put(`${baseUrl}/items/1`)
+        .withJson({})
+        .expectStatus(StatusCodes.BAD_REQUEST);
+    });
+  });
+  
+  
+    
   
   
   
