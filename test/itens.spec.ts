@@ -118,4 +118,141 @@ describe('Simple API validation', () => {
         .expectStatus(StatusCodes.NOT_FOUND); 
     });
   });
+
+  describe('Atualizando item inexistente', () => {
+    it('Deve retornar NOT FOUND', async () => {
+      const updatedItem = {
+        type: 'cd',
+        isbn13: generateIsbn13(),
+        price: 99.0,
+        numberinstock: 3
+      };
+  
+      await p
+        .spec()
+        .put(`${baseUrl}/items/9999`) 
+        .withJson(updatedItem)
+        .expectStatus(StatusCodes.BAD_REQUEST);
+    });
+  });
+
+  describe('Validação ao criar um item inválido', () => {
+    it('Não deve permitir criar item sem "type"', async () => {
+      const newItem = {
+        isbn13: generateIsbn13(),
+        price: 45.0,
+        numberinstock: 5
+      };
+  
+      await p
+        .spec()
+        .post(`${baseUrl}/items`)
+        .withJson(newItem)
+        .expectStatus(StatusCodes.BAD_REQUEST); 
+    });
+  });
+  describe('Criar e deletar item na sequência', () => {
+    it('Deve criar e deletar o item com sucesso', async () => {
+      const newItem = {
+        type: 'book',
+        isbn13: generateIsbn13(),
+        price: 35.0,
+        numberinstock: 7
+      };
+  
+      const createResponse = await p
+        .spec()
+        .post(`${baseUrl}/items`)
+        .withJson(newItem)
+        .expectStatus(StatusCodes.CREATED);
+  
+      const itemId = createResponse.body.id;
+  
+      await p
+        .spec()
+        .delete(`${baseUrl}/items/${itemId}`)
+        .expectStatus(StatusCodes.OK);
+  
+      await p
+        .spec()
+        .get(`${baseUrl}/items/${itemId}`)
+        .expectStatus(StatusCodes.NOT_FOUND);
+    });
+  });
+
+  describe('Deletando item inexistente', () => {
+    it('Deve retornar NOT FOUND ao tentar deletar item com id inexistente', async () => {
+      await p
+        .spec()
+        .delete(`${baseUrl}/items/9999`) 
+        .expectStatus(StatusCodes.NOT_FOUND);
+    });
+  });
+  
+  describe('Criar e atualizar item sequencialmente', () => {
+    it('Deve criar e atualizar o item com sucesso', async () => {
+      const isbn13 = generateIsbn13();
+  
+      const newItem = {
+        type: 'cd',
+        isbn13,
+        price: 55.0,
+        numberinstock: 15
+      };
+  
+      const createResponse = await p
+        .spec()
+        .post(`${baseUrl}/items`)
+        .withJson(newItem)
+        .expectStatus(StatusCodes.CREATED);
+  
+      const itemId = createResponse.body.id;
+  
+      const updatedItem = {
+        ...newItem,
+        price: 60.0,
+        numberinstock: 25
+      };
+  
+      await p
+        .spec()
+        .put(`${baseUrl}/items/${itemId}`)
+        .withJson(updatedItem)
+        .expectStatus(StatusCodes.OK)
+        .expectJsonLike({
+          id: itemId,
+          price: 60.0,
+          numberinstock: 25
+        });
+    });
+  });
+  describe('Verificar diferentes tipos de itens', () => {
+    const types = ['book', 'cd', 'dvd'];
+  
+    types.forEach(type => {
+      it(`Deve criar item do tipo "${type}"`, async () => {
+        const newItem = {
+          type,
+          isbn13: generateIsbn13(),
+          price: 25.0,
+          numberinstock: 10
+        };
+  
+        await p
+          .spec()
+          .post(`${baseUrl}/items`)
+          .withJson(newItem)
+          .expectStatus(StatusCodes.CREATED)
+          .expectJsonLike({
+            type,
+            price: 25.0,
+            numberinstock: 10
+          });
+      });
+    });
+  });
+  
+  
+  
+  
 });
