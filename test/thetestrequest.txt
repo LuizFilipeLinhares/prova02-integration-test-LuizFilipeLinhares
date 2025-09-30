@@ -13,7 +13,6 @@ describe('TheTestRequest API validation', () => {
   beforeAll(() => p.reporter.add(rep));
   afterAll(() => p.reporter.end());
 
-  // utilitário para gerar dados fake para author / article / comment
   const makeAuthorData = () => ({
     author: {
       name: faker.person.fullName(),
@@ -45,9 +44,9 @@ describe('TheTestRequest API validation', () => {
         .get(`${baseUrl}/authors`)
         .expectStatus(StatusCodes.OK)
         .expectJsonLike([{
-          id: p.types.number(),
-          name: p.types.string(),
-          email: p.types.string()
+          id: Number,
+          name: String,
+          email: String
         }]);
     });
 
@@ -112,9 +111,9 @@ describe('TheTestRequest API validation', () => {
         .get(`${baseUrl}/articles`)
         .expectStatus(StatusCodes.OK)
         .expectJsonLike([{
-          id: p.types.number(),
-          title: p.types.string(),
-          body: p.types.string()
+          id: Number,
+          title: String,
+          body: String
         }]);
     });
 
@@ -125,9 +124,9 @@ describe('TheTestRequest API validation', () => {
         .get(`${baseUrl}/authors/${authorId}/articles`)
         .expectStatus(StatusCodes.OK)
         .expectJsonLike([{
-          id: p.types.number(),
-          title: p.types.string(),
-          body: p.types.string(),
+          id: Number,
+          title: String,
+          body: String,
           author_id: authorId
         }]);
     });
@@ -197,9 +196,9 @@ describe('TheTestRequest API validation', () => {
         .get(`${baseUrl}/articles/${articleId}/comments`)
         .expectStatus(StatusCodes.OK)
         .expectJsonLike([{
-          id: p.types.number(),
-          body: p.types.string(),
-          written_by: p.types.string()
+          id: Number,
+          body: String,
+          written_by: String
         }]);
     });
 
